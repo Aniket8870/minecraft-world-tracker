@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Minecraft World Tracker</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background:
+                linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.65)),
+                #202020;
+            color: white;
+        }
+
+        /* HEADER */
+
+        header {
+            background: #3b8526;
+            border-bottom: 8px solid #2d641d;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 0 #111;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 42px;
+            text-shadow: 4px 4px #222;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            margin-top: 8px;
+            color: #e4e4e4;
+        }
+
+        /* MAIN */
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 35px auto;
+        }
+
+        /* STATS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            background: #292929;
+            border: 4px solid #111;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 5px 5px 0 #111;
+        }
+
+        .stat h2 {
+            margin: 0;
+            font-size: 30px;
+            color: #7cff4f;
+        }
+
+        .stat p {
+            margin: 8px 0 0;
+            color: #ccc;
+        }
+
+        /* FORM */
+
+        .panel {
+            background: #303030;
+            border: 5px solid #111;
+            padding: 25px;
+            margin-bottom: 35px;
+            box-shadow: 7px 7px 0 #111;
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            color: #7cff4f;
+            border-bottom: 3px solid #555;
+            padding-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #1d1d1d;
+            color: white;
+            border: 3px solid #555;
+            outline: none;
+            font-size: 15px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #55a832;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 14px 25px;
+            border: 4px solid #111;
+            background: #55a832;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #111;
+        }
+
+        button:hover {
+            background: #6bc344;
+            transform: translateY(-2px);
+        }
+
+        /* ENTRIES */
+
+        .entries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .entry {
+            background: #292929;
+            border: 5px solid #111;
+            box-shadow: 7px 7px 0 #111;
+            overflow: hidden;
+        }
+
+        .entry-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #111;
+        }
+
+        .entry-content {
+            padding: 20px;
+        }
+
+        .entry h3 {
+            margin-top: 0;
+            color: #7cff4f;
+            font-size: 23px;
+        }
+
+        .entry p {
+            color: #ddd;
+            line-height: 1.5;
+        }
+
+        .resource {
+            display: inline-block;
+            background: #1b1b1b;
+            padding: 7px 10px;
+            margin: 4px;
+            border: 2px solid #555;
+        }
+
+        .delete-btn {
+            background: #a83232;
+            margin-top: 15px;
+        }
+
+        .delete-btn:hover {
+            background: #d04444;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: #aaa;
+            border: 3px dashed #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            background: #111;
+            color: #888;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            header h1 {
+                font-size: 28px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 94%;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>⛏️ MINECRAFT WORLD TRACKER ⛏️</h1>
+
+    <p>Record your daily Minecraft adventures</p>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat">
+            <h2 id="totalDays">0</h2>
+            <p>Days Recorded</p>
+        </div>
+
+        <div class="stat">
+            <h2 id="totalHours">0</h2>
+            <p>Total Hours</p>
+        </div>
+
+        <div class="stat">
+            <h2 id="totalBuilds">0</h2>
+            <p>Builds</p>
+        </div>
+
+        <div class="stat">
+            <h2 id="totalEntries">0</h2>
+            <p>World Entries</p>
+        </div>
+
+    </div>
+
+
+    <!-- ADD DAILY DATA -->
+
+    <div class="panel">
+
+        <h2>🌳 Add Today's Minecraft Progress</h2>
+
+        <form id="minecraftForm">
+
+            <div class="row">
+
+                <div>
+
+                    <label>Date</label>
+
+                    <input
+                        type="date"
+                        id="date"
+                        required
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>Playtime (hours)</label>
+
+                    <input
+                        type="number"
+                        id="playtime"
+                        min="0"
+                        step="0.5"
+                        placeholder="Example: 3.5"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <label>What did you do today?</label>
+
+            <textarea
+                id="activities"
+                placeholder="Example: Built a new house, explored a cave, found diamonds..."
+                required
+            ></textarea>
+
+
+            <label>Resources Collected</label>
+
+            <input
+                type="text"
+                id="resources"
+                placeholder="Example: 32 Diamonds, 4 Gold, 2 stacks of Iron"
+            >
+
+
+            <div class="row">
+
+                <div>
+
+                    <label>Builds Completed</label>
+
+                    <input
+                        type="number"
+                        id="builds"
+                        min="0"
+                        value="0"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>Current Minecraft Day</label>
+
+                    <input
+                        type="number"
+                        id="minecraftDay"
+                        min="0"
+                        placeholder="Example: 245"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <label>Notes</label>
+
+            <textarea
+                id="notes"
+                placeholder="Anything important that happened today..."
+            ></textarea>
+
+
+            <label>Upload World Screenshot</label>
+
+            <input
+                type="file"
+                id="screenshot"
+                accept="image/*"
+            >
+
+
+            <button type="submit">
+
+                💾 SAVE DAILY PROGRESS
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- ENTRIES -->
+
+    <div class="panel">
+
+        <h2>📜 Your Minecraft Journal</h2>
+
+        <div id="entries" class="entries"></div>
+
+    </div>
+
+</div>
+
+
+<footer>
+
+    ⛏️ Minecraft World Tracker | Keep building. Keep exploring. 🌳
+
+</footer>
+
+
+<script>
+
+    /* LOAD SAVED DATA */
+
+    let entries = JSON.parse(
+        localStorage.getItem("minecraftEntries")
+    ) || [];
+
+
+    /* FORM */
+
+    const form = document.getElementById("minecraftForm");
+
+
+    form.addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+
+        const date =
+            document.getElementById("date").value;
+
+        const playtime =
+            Number(document.getElementById("playtime").value);
+
+        const activities =
+            document.getElementById("activities").value;
+
+        const resources =
+            document.getElementById("resources").value;
+
+        const builds =
+            Number(document.getElementById("builds").value);
+
+        const minecraftDay =
+            document.getElementById("minecraftDay").value;
+
+        const notes =
+            document.getElementById("notes").value;
+
+        const screenshot =
+            document.getElementById("screenshot").files[0];
+
+
+        /* IMAGE */
+
+        if (screenshot) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                saveEntry(
+                    date,
+                    playtime,
+                    activities,
+                    resources,
+                    builds,
+                    minecraftDay,
+                    notes,
+                    e.target.result
+                );
+
+            };
+
+            reader.readAsDataURL(screenshot);
+
+        }
+
+        else {
+
+            saveEntry(
+                date,
+                playtime,
+                activities,
+                resources,
+                builds,
+                minecraftDay,
+                notes,
+                ""
+            );
+
+        }
+
+    });
+
+
+    /* SAVE ENTRY */
+
+    function saveEntry(
+        date,
+        playtime,
+        activities,
+        resources,
+        builds,
+        minecraftDay,
+        notes,
+        image
+    ) {
+
+        const entry = {
+
+            id: Date.now(),
+
+            date: date,
+
+            playtime: playtime,
+
+            activities: activities,
+
+            resources: resources,
+
+            builds: builds,
+
+            minecraftDay: minecraftDay,
+
+            notes: notes,
+
+            image: image
+
+        };
+
+
+        entries.unshift(entry);
+
+
+        localStorage.setItem(
+            "minecraftEntries",
+            JSON.stringify(entries)
+        );
+
+
+        form.reset();
+
+
+        document.getElementById("builds").value = 0;
+
+
+        displayEntries();
+
+    }
+
+
+    /* DISPLAY ENTRIES */
+
+    function displayEntries() {
+
+        const container =
+            document.getElementById("entries");
+
+
+        container.innerHTML = "";
+
+
+        if (entries.length === 0) {
+
+            container.innerHTML = `
+
+                <div class="empty">
+
+                    <h2>🌳 No adventures recorded yet!</h2>
+
+                    <p>
+                        Add your first Minecraft day above.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        entries.forEach(function(entry) {
+
+            const card =
+                document.createElement("div");
+
+            card.className = "entry";
+
+
+            let imageHTML = "";
+
+            if (entry.image) {
+
+                imageHTML = `
+
+                    <img
+                        class="entry-image"
+                        src="${entry.image}"
+                    >
+
+                `;
+
+            }
+
+
+            card.innerHTML = `
+
+                ${imageHTML}
+
+                <div class="entry-content">
+
+                    <h3>
+                        📅 ${entry.date}
+                    </h3>
+
+
+                    <p>
+
+                        ⏱️ <strong>Playtime:</strong>
+                        ${entry.playtime} hours
+
+                    </p>
+
+
+                    <p>
+
+                        🌳 <strong>Minecraft Day:</strong>
+                        ${entry.minecraftDay || "Not recorded"}
+
+                    </p>
+
+
+                    <p>
+
+                        ⛏️ <strong>Activities:</strong><br>
+
+                        ${entry.activities}
+
+                    </p>
+
+
+                    <p>
+
+                        💎 <strong>Resources:</strong><br>
+
+                        ${
+                            entry.resources ||
+                            "No resources recorded"
+                        }
+
+                    </p>
+
+
+                    <p>
+
+                        🏠 <strong>Builds:</strong>
+                        ${entry.builds}
+
+                    </p>
+
+
+                    <p>
+
+                        📝 <strong>Notes:</strong><br>
+
+                        ${
+                            entry.notes ||
+                            "No notes"
+                        }
+
+                    </p>
+
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteEntry(${entry.id})"
+                    >
+
+                        🗑️ DELETE ENTRY
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(card);
+
+        });
+
+
+        updateStats();
+
+    }
+
+
+    /* DELETE */
+
+    function deleteEntry(id) {
+
+        if (
+            confirm(
+                "Delete this Minecraft entry?"
+            )
+        ) {
+
+            entries =
+                entries.filter(
+                    entry => entry.id !== id
+                );
+
+
+            localStorage.setItem(
+                "minecraftEntries",
+                JSON.stringify(entries)
+            );
+
+
+            displayEntries();
+
+        }
+
+    }
+
+
+    /* STATISTICS */
+
+    function updateStats() {
+
+        document.getElementById(
+            "totalDays"
+        ).textContent = entries.length;
+
+
+        const hours =
+            entries.reduce(
+                (sum, entry) =>
+                    sum + Number(entry.playtime),
+                0
+            );
+
+
+        document.getElementById(
+            "totalHours"
+        ).textContent =
+            hours.toFixed(1);
+
+
+        const builds =
+            entries.reduce(
+                (sum, entry) =>
+                    sum + Number(entry.builds),
+                0
+            );
+
+
+        document.getElementById(
+            "totalBuilds"
+        ).textContent = builds;
+
+
+        document.getElementById(
+            "totalEntries"
+        ).textContent = entries.length;
+
+    }
+
+
+    /* DEFAULT DATE = TODAY */
+
+    document.getElementById("date").value =
+        new Date().toISOString().split("T")[0];
+
+
+    /* START */
+
+    displayEntries();
+
+</script>
+
+</body>
+</html>
